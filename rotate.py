@@ -1,5 +1,10 @@
 #!/usr/bin/env python2.6
 
+"""
+Run this in crontab, with something like this:
+	0 5 * * * rotateweb.py && apache2ctl graceful;/etc/init.d/cherokee reload
+"""
+
 import gzip
 import os
 import itertools
@@ -48,7 +53,7 @@ def rotate_file(filename):
 			except OSError:
 				pass
 			
-		# Gzip the first one then empty it
+		# Gzip the first one and then empty it
 		elif i == 1:
 			_gzip_file(filename, rotated_filename)
 			open(filename, 'w').truncate()
