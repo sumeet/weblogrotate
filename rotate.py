@@ -8,7 +8,6 @@ Run this in crontab, with something like this:
 import gzip
 import os
 import itertools
-import re
 
 OLD_LOG_LIMIT = 4
 _base_path = os.path.abspath('/var/www')
