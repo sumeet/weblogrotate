@@ -8,6 +8,7 @@ Run this in crontab, with something like this:
 import gzip
 import os
 import itertools
+import re
 
 OLD_LOG_LIMIT = 4
 _base_path = os.path.abspath('/var/www')
@@ -27,9 +28,17 @@ _directories = itertools.chain(
 def _join(path, filenames):
 	return (os.path.join(path, filename) for filename in filenames)
 
+_valid_filename_re = re.compile(r'^(access|error)[._]log$')
+
+def _list_valid_files(directory):
+	return (
+		filename for filename in os.listdir(directory) if
+			_valid_filename_re.match(filename)
+	)
+
 FILES_TO_ROTATE = itertools.chain.from_iterable(
 	_join(path, filenames) for path, filenames in (
-			(directory, os.listdir(directory))
+			(directory, _list_valid_files(directory))
 				for directory in _directories
 	)
 )
@@ -53,11 +62,11 @@ def rotate_file(filename):
 				pass
 			
 		# Gzip the first one and then empty it
-		elif i == 1:
-			_gzip_file(filename, rotated_filename)
-			open(filename, 'w').truncate()
-			
 		else:
+			if i == 1:
+				_gzip_file(filename, rotated_filename)
+				open(filename, 'w').truncate()
+
 			next_rotated_filename = '%s.%d' % (filename, i+1)
 			try:
 				os.rename(rotated_filename, next_rotated_filename)
