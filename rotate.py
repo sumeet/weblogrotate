@@ -11,6 +11,11 @@ import itertools
 import re
 
 OLD_LOG_LIMIT = 4
+
+"""
+Example that I use on my server. FILES_TO_ROTATE should just be an iterable
+containing the paths of the files you need to rotate.
+
 _base_path = os.path.abspath('/var/www')
 _directories = itertools.chain(
 	(
@@ -42,6 +47,7 @@ FILES_TO_ROTATE = itertools.chain.from_iterable(
 				for directory in _directories
 	)
 )
+"""
 
 def _gzip_file(input_filename, output_filename):
 	input_file = open(input_filename, 'rb')
