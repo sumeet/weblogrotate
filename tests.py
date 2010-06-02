@@ -42,7 +42,7 @@ class TestRotation(unittest.TestCase):
 			
 		for filename in FILES_TO_ROTATE:
 			self.assertEqual(open(filename).read(), '')
-			self.assertEqual(gzip.open(filename + '.1').read(), 'stuff')
+			self.assertEqual(gzip.open(filename + '.1').read(), FILE_CONTENT)
 	
 	def test_rotate_twice(self):
 		_rotate_files(times=2)
@@ -50,7 +50,7 @@ class TestRotation(unittest.TestCase):
 		for filename in FILES_TO_ROTATE:
 			self.assertEqual(open(filename).read(), '')
 			self.assertEqual(gzip.open(filename + '.1').read(), '')
-			self.assertEqual(gzip.open(filename + '.2').read(), 'stuff')
+			self.assertEqual(gzip.open(filename + '.2').read(), FILE_CONTENT)
 	
 	def test_rotate_three_times(self):
 		_rotate_files(times=3)
@@ -59,7 +59,7 @@ class TestRotation(unittest.TestCase):
 			self.assertEqual(open(filename).read(), '')
 			self.assertEqual(gzip.open(filename + '.1').read(), '')
 			self.assertEqual(gzip.open(filename + '.2').read(), '')
-			self.assertEqual(gzip.open(filename + '.3').read(), 'stuff')
+			self.assertEqual(gzip.open(filename + '.3').read(), FILE_CONTENT)
 
 	def test_rotate_four_times(self):
 		_rotate_files(times=4)
@@ -69,7 +69,7 @@ class TestRotation(unittest.TestCase):
 			self.assertEqual(gzip.open(filename + '.1').read(), '')
 			self.assertEqual(gzip.open(filename + '.2').read(), '')
 			self.assertEqual(gzip.open(filename + '.3').read(), '')
-			self.assertEqual(gzip.open(filename + '.4').read(), 'stuff')
+			self.assertEqual(gzip.open(filename + '.4').read(), FILE_CONTENT)
 
 	def test_did_not_make_fifth_file(self):
 		_rotate_files(times=5)
