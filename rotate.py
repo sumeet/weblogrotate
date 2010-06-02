@@ -67,17 +67,17 @@ def rotate_file(filename):
 			except OSError:
 				pass
 			
-		# Gzip the first one and then empty it
 		else:
-			if i == 1:
-				_gzip_file(filename, rotated_filename)
-				open(filename, 'w').truncate()
-
 			next_rotated_filename = '%s.%d' % (filename, i+1)
 			try:
 				os.rename(rotated_filename, next_rotated_filename)
 			except OSError:
 				pass
+
+			# Gzip the first one and then empty it
+			if i == 1:
+				_gzip_file(filename, rotated_filename)
+				open(filename, 'w').truncate()
 
 def rotate_files():
 	for filename in FILES_TO_ROTATE:
