@@ -12,40 +12,28 @@ import re
 
 OLD_LOG_LIMIT = 4
 
+def find(expression, path='.', type='df'):
+	"""
+	Find files or directories based on `expression` in `path`.
+	"""
+	for base, directories, files in os.walk(path):
+		if 'd' in type:
+			for directory in directories:
+				if re.match(expression, os.path.join(base, directory)):
+					yield os.path.join(base, directory)
+		if 'f' in type:
+			for file in files:
+				if re.match(expression, os.path.join(base, file)):
+					yield os.path.join(base, file)
+
 """
 Example that I use on my server. FILES_TO_ROTATE should just be an iterable
 containing the paths of the files you need to rotate.
 
-_base_path = os.path.abspath('/var/www')
-_directories = itertools.chain(
-	(
-		os.path.join(_base_path, path, 'logging')
-			for path in os.listdir(_base_path)
-				if os.path.isdir(os.path.join(_base_path, path, 'logging'))
-	),
-	(
-		os.path.join(_base_path, path, 'logs')
-			for path in os.listdir(_base_path)
-				if os.path.isdir(os.path.join(_base_path, path, 'logs'))
-	)
-)
-
-def _join(path, filenames):
-	return (os.path.join(path, filename) for filename in filenames)
-
-_valid_filename_re = re.compile(r'^(access|error)[._]log$')
-
-def _list_valid_files(directory):
-	return (
-		filename for filename in os.listdir(directory) if
-			_valid_filename_re.match(filename)
-	)
-
-FILES_TO_ROTATE = itertools.chain.from_iterable(
-	_join(path, filenames) for path, filenames in (
-			(directory, _list_valid_files(directory))
-				for directory in _directories
-	)
+FILES_TO_ROTATE = find(
+	r'.*/log(ging|s)/.*(access|error)[._]log$',
+	'/var',
+	type='f'
 )
 """
 
@@ -59,14 +47,14 @@ def _gzip_file(input_filename, output_filename):
 def rotate_file(filename):
 	for i in reversed(xrange(1, OLD_LOG_LIMIT+1)):
 		rotated_filename = '%s.%d' % (filename, i)
-		
+
 		# Delete the last one
 		if i == OLD_LOG_LIMIT:
 			try:
 				os.remove(rotated_filename)
 			except OSError:
 				pass
-			
+
 		else:
 			next_rotated_filename = '%s.%d' % (filename, i+1)
 			try:
@@ -82,6 +70,6 @@ def rotate_file(filename):
 def rotate_files():
 	for filename in FILES_TO_ROTATE:
 		rotate_file(filename)
-	
+
 if __name__ == '__main__':
 	rotate_files()
