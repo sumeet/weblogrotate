@@ -7,25 +7,29 @@ Run this in crontab, with something like this:
 
 import gzip
 import os
-import itertools
 import re
 
-OLD_LOG_LIMIT = 4
+
+OLD_LOG_LIMIT = 4 # How many old, gzipped log files to keep around.
+
 
 def find(expression, path='.', type='df'):
 	"""
 	Find files or directories based on `expression` in `path`.
 	"""
+	find_re = re.compile(expression)
 	for base, directories, files in os.walk(path):
 		if 'd' in type:
 			for directory in directories:
-				if re.match(expression, os.path.join(base, directory)):
+				if find_re.match(os.path.join(base, directory)):
 					yield os.path.join(base, directory)
 		if 'f' in type:
 			for file in files:
-				if re.match(expression, os.path.join(base, file)):
+				if find_re.match(os.path.join(base, file)):
 					yield os.path.join(base, file)
 
+
+FILES_TO_ROTATE = (
 """
 Example that I use on my server. FILES_TO_ROTATE should just be an iterable
 containing the paths of the files you need to rotate.
@@ -36,6 +40,8 @@ FILES_TO_ROTATE = find(
 	type='f'
 )
 """
+)
+
 
 def _gzip_file(input_filename, output_filename):
 	input_file = open(input_filename, 'rb')
@@ -43,6 +49,7 @@ def _gzip_file(input_filename, output_filename):
 	output_file.writelines(input_file)
 	output_file.close()
 	input_file.close()
+
 
 def rotate_file(filename):
 	for i in reversed(xrange(1, OLD_LOG_LIMIT+1)):
@@ -67,9 +74,11 @@ def rotate_file(filename):
 				_gzip_file(filename, rotated_filename)
 				open(filename, 'w').truncate()
 
+
 def rotate_files():
 	for filename in FILES_TO_ROTATE:
 		rotate_file(filename)
+
 
 if __name__ == '__main__':
 	rotate_files()
